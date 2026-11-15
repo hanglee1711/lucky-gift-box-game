@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI LÀ NGƯỜI MAY MẮN? - Hộp Quà Bí Ẩn</title>
+<style>
+:root{
+  --bg1:#17172f; --bg2:#0f0f24; --card:#22224a; --card2:#2b2b5c; --border:#3a3a72;
+  --text:#ffffff; --text-dim:#b9b9d9; --gold:#ffd43b; --gold-dark:#f5a623;
+  --primary:#7c4dff; --primary-hover:#6937e0; --danger:#ff6b6b;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;min-height:100vh;background:radial-gradient(circle at 50% 0%,var(--bg1),var(--bg2));color:var(--text);font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;}
+.hidden{display:none !important;}
+button{cursor:pointer;font-family:inherit;}
+
+.screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:30px 16px 50px;}
+
+.game-title{font-size:30px;font-weight:900;text-align:center;color:var(--gold);text-shadow:0 2px 10px rgba(255,212,59,.4);letter-spacing:.5px;}
+.game-title.small{font-size:24px;}
+.game-subtitle{font-size:13px;font-weight:700;color:var(--text-dim);text-align:center;letter-spacing:1px;margin-top:4px;margin-bottom:6px;}
+
+/* ---------- Setup screen ---------- */
+.setup-card{width:480px;max-width:100%;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:30px 28px;margin-top:10px;box-shadow:0 10px 40px rgba(0,0,0,.4);}
+.setup-desc{font-size:13px;color:var(--text-dim);text-align:center;margin:16px 0 14px;}
+.name-list{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;padding-right:4px;margin-bottom:12px;}
+.name-row{display:flex;gap:8px;align-items:center;}
+.name-row span.idx{width:22px;text-align:center;font-weight:700;color:var(--gold);font-size:12px;}
+.name-row input{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;}
+.name-row input::placeholder{color:#8585ad;}
+.name-row input:focus{outline:none;border-color:var(--gold);}
+.btn-remove{background:transparent;border:none;color:var(--danger);font-size:16px;font-weight:700;padding:4px 8px;}
+.btn-remove:hover{color:#ff9f9f;}
+.setup-error{min-height:18px;font-size:12px;color:var(--danger);font-weight:700;text-align:center;margin-bottom:8px;}
+
+.btn{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-weight:700;color:var(--text);font-size:13px;}
+.btn:hover{background:#38386e;}
+.btn-ghost{background:transparent;border:1px solid var(--border);}
+.btn-primary{background:linear-gradient(135deg,var(--primary),#9c6bff);border:none;color:#fff;box-shadow:0 4px 16px rgba(124,77,255,.4);}
+.btn-primary:hover{background:linear-gradient(135deg,var(--primary-hover),#8a54ff);}
+.btn-block{width:100%;}
+
+/* ---------- Game screen ---------- */
+.game-header{text-align:center;margin-bottom:8px;}
+.stats-row{display:flex;gap:12px;margin:16px 0 6px;flex-wrap:wrap;justify-content:center;}
+.stat-pill{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:8px 18px;font-size:12px;font-weight:700;color:var(--text-dim);}
+.stat-pill b{color:var(--gold);font-size:14px;}
+.instruction{font-size:15px;font-weight:700;color:var(--text);text-align:center;margin:10px 0 24px;}
+
+.box-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:20px;max-width:900px;width:100%;margin-bottom:10px;}
+.gift-box{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.gift-box .box-face{width:120px;height:120px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:52px;cursor:pointer;position:relative;box-shadow:0 6px 18px rgba(0,0,0,.35);transition:transform .15s;border:2px solid rgba(255,255,255,.25);}
+.gift-box .box-face:hover{transform:translateY(-5px) scale(1.04);}
+.gift-box .box-label{font-size:12px;font-weight:800;color:var(--text-dim);letter-spacing:.5px;}
+.gift-box.opened .box-face{opacity:.4;cursor:default;transform:none !important;filter:grayscale(.6);}
+.gift-box.opened .box-label{color:var(--gold);}
+.gift-box .box-face.shaking{animation:shake .6s ease;}
+@keyframes shake{
+  0%,100%{transform:rotate(0deg);}
+  15%{transform:rotate(-8deg) scale(1.03);}
+  30%{transform:rotate(7deg) scale(1.05);}
+  45%{transform:rotate(-7deg) scale(1.06);}
+  60%{transform:rotate(6deg) scale(1.05);}
+  75%{transform:rotate(-4deg) scale(1.03);}
+}
+
+.history-wrap{width:100%;max-width:900px;margin-top:10px;}
+.history-title{font-size:12px;font-weight:700;color:var(--text-dim);margin-bottom:8px;letter-spacing:.5px;}
+.history-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.history-chip{background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;}
+.history-chip b{color:var(--gold);margin-right:4px;}
+
+.footer-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:30px;}
+
+/* ---------- Result overlay ---------- */
+.result-overlay{position:fixed;inset:0;background:rgba(5,5,20,.75);display:flex;align-items:center;justify-content:center;z-index:1000;}
+#confettiCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+.result-card{position:relative;background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid var(--gold-dark);border-radius:20px;padding:40px 48px;text-align:center;box-shadow:0 0 60px rgba(255,212,59,.35);animation:pop .35s ease;}
+@keyframes pop{from{transform:scale(.6);opacity:0;}to{transform:scale(1);opacity:1;}}
+.result-emoji{font-size:54px;margin-bottom:6px;}
+.result-label{font-size:13px;font-weight:700;color:var(--text-dim);letter-spacing:1px;}
+.result-name{font-size:32px;font-weight:900;color:var(--gold);margin:10px 0 24px;text-shadow:0 2px 12px rgba(255,212,59,.5);}
+
+@media (max-width:560px){
+  .setup-card{padding:24px 18px;}
+  .result-card{padding:30px 24px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== SETUP SCREEN ===================== -->
+<div id="setupScreen" class="screen">
+  <div class="game-title">🎁 AI LÀ NGƯỜI MAY MẮN?</div>
+  <div class="game-subtitle">MỘT HỘP QUÀ — MỘT NGƯỜI ĐƯỢC CHỌN</div>
+  <div class="setup-card">
+    <div class="setup-desc">Nhập danh sách tên học sinh tham gia (tối thiểu 2 người):</div>
+    <div class="name-list" id="nameList"></div>
+    <button class="btn btn-ghost btn-block" id="btnAddName" style="margin-bottom:14px;">+ Thêm người</button>
+    <div class="setup-error" id="setupError"></div>
+    <button class="btn btn-primary btn-block" id="btnStartGame">🎮 BẮT ĐẦU TRÒ CHƠI</button>
+  </div>
+</div>
+
+<!-- ===================== GAME SCREEN ===================== -->
+<div id="gameScreen" class="screen hidden">
+  <div class="game-header">
+    <div class="game-title small">🎁 AI LÀ NGƯỜI MAY MẮN?</div>
+    <div class="game-subtitle">MỘT HỘP QUÀ — MỘT NGƯỜI ĐƯỢC CHỌN</div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-pill">SỐ NGƯỜI: <b id="statTotal">00</b></div>
+    <div class="stat-pill">LƯỢT CHỌN: <b id="statRound">00</b> / <span id="statRoundTotal">00</span></div>
+  </div>
+  <div class="instruction" id="instruction">Hãy chọn một hộp quà bí ẩn! 🎉</div>
+  <div class="box-grid" id="boxGrid"></div>
+  <div class="history-wrap">
+    <div class="history-title">📜 ĐÃ GỌI:</div>
+    <div class="history-chips" id="historyChips"></div>
+  </div>
+  <div class="footer-actions">
+    <button class="btn btn-ghost" id="btnReplay">🔄 Chơi Lại</button>
+    <button class="btn btn-ghost" id="btnSettings">⚙️ Cài Đặt</button>
+    <button class="btn btn-ghost" id="btnFullscreen">⛶ Toàn Màn Hình</button>
+  </div>
+</div>
+
+<!-- ===================== RESULT OVERLAY ===================== -->
+<div id="resultOverlay" class="result-overlay hidden">
+  <canvas id="confettiCanvas"></canvas>
+  <div class="result-card">
+    <div class="result-emoji">🎉</div>
+    <div class="result-label">NGƯỜI MAY MẮN LÀ</div>
+    <div class="result-name" id="resultName">...</div>
+    <button class="btn btn-primary" id="btnCloseResult">Tiếp Tục ▶</button>
+  </div>
+</div>
+
+<script>
+/* ===================== Config ===================== */
+const DEFAULT_NAMES = [
+  "Nguyễn Văn A", "Trần Thị B", "Lê Văn C",
+  "Phạm Thị D", "Hoàng Văn E", "Đỗ Thị F"
+];
+const BOX_EMOJIS = ['🎁','🎀','🎁','🎀','🎁','🎀','🎁','🎀'];
+const BOX_COLORS = ['#ff6b6b','#4dabf7','#51cf66','#cc5de8','#ffa94d','#20c997','#f783ac','#845ef7','#ff8787','#74c0fc'];
+
+/* ===================== State ===================== */
+let names = [];
+let assignment = [];
+let openedCount = 0;
+let openedOrder = [];
+
+/* ===================== Setup screen ===================== */
+function renderNameRows(list){
+  const wrap = document.getElementById('nameList');
+  wrap.innerHTML = '';
+  list.forEach((val, i) => addNameRow(val));
+}
+function addNameRow(value){
+  const wrap = document.getElementById('nameList');
+  const row = document.createElement('div');
+  row.className = 'name-row';
+  const idx = document.createElement('span');
+  idx.className = 'idx';
+  row.appendChild(idx);
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.placeholder = 'Nhập tên học sinh...';
+  input.value = value || '';
+  row.appendChild(input);
+  const btnDel = document.createElement('button');
+  btnDel.className = 'btn-remove';
+  btnDel.textContent = '✕';
+  btnDel.onclick = () => { row.remove(); renumberRows(); };
+  row.appendChild(btnDel);
+  wrap.appendChild(row);
+  renumberRows();
+}
+function renumberRows(){
+  document.querySelectorAll('#nameList .name-row').forEach((row, i) => {
+    row.querySelector('.idx').textContent = (i + 1) + '.';
+  });
+}
+function collectNames(){
+  return Array.from(document.querySelectorAll('#nameList input'))
+    .map(inp => inp.value.trim())
+    .filter(v => v.length > 0);
+}
+function startGame(){
+  const errEl = document.getElementById('setupError');
+  const collected = collectNames();
+  if(collected.length < 2){
+    errEl.textContent = 'Vui lòng nhập ít nhất 2 tên để bắt đầu trò chơi!';
+    return;
+  }
+  errEl.textContent = '';
+  names = collected;
+  document.getElementById('setupScreen').classList.add('hidden');
+  document.getElementById('gameScreen').classList.remove('hidden');
+  newRound();
+}
+
+/* ===================== Game screen ===================== */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function newRound(){
+  assignment = shuffle(names);
+  openedCount = 0;
+  openedOrder = [];
+  document.getElementById('statTotal').textContent = String(names.length).padStart(2, '0');
+  document.getElementById('statRoundTotal').textContent = String(names.length).padStart(2, '0');
+  document.getElementById('statRound').textContent = '00';
+  document.getElementById('instruction').textContent = 'Hãy chọn một hộp quà bí ẩn! 🎉';
+  renderHistory();
+  renderBoxGrid();
+}
+function renderBoxGrid(){
+  const grid = document.getElementById('boxGrid');
+  grid.innerHTML = '';
+  assignment.forEach((_, i) => {
+    const box = document.createElement('div');
+    box.className = 'gift-box';
+    box.innerHTML = `
+      <div class="box-face" style="background:linear-gradient(145deg, ${BOX_COLORS[i % BOX_COLORS.length]}, ${shade(BOX_COLORS[i % BOX_COLORS.length], -18)})">
+        ${BOX_EMOJIS[i % BOX_EMOJIS.length]}
+      </div>
+      <div class="box-label">HỘP ${i + 1}</div>`;
+    box.querySelector('.box-face').addEventListener('click', () => openBox(i, box));
+    grid.appendChild(box);
+  });
+}
+function shade(hex, percent){
+  const num = parseInt(hex.slice(1), 16);
+  let r = (num >> 16) + Math.round(2.55 * percent);
+  let g = ((num >> 8) & 0x00FF) + Math.round(2.55 * percent);
+  let b = (num & 0x0000FF) + Math.round(2.55 * percent);
+  r = Math.min(255, Math.max(0, r));
+  g = Math.min(255, Math.max(0, g));
+  b = Math.min(255, Math.max(0, b));
+  return `#${(1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1)}`;
+}
+function openBox(idx, boxEl){
+  if(boxEl.classList.contains('opened')) return;
+  const face = boxEl.querySelector('.box-face');
+  face.classList.add('shaking');
+  setTimeout(() => {
+    boxEl.classList.add('opened');
+    openedCount++;
+    const person = assignment[idx];
+    openedOrder.push(person);
+    document.getElementById('statRound').textContent = String(openedCount).padStart(2, '0');
+    renderHistory();
+    showResult(person);
+    playChime();
+    if(openedCount >= names.length){
+      document.getElementById('instruction').textContent = '🏁 Đã mở hết tất cả hộp quà! Nhấn "Chơi Lại" để chơi vòng mới.';
+    }
+  }, 650);
+}
+function renderHistory(){
+  const wrap = document.getElementById('historyChips');
+  if(!openedOrder.length){
+    wrap.innerHTML = '<span style="color:#8585ad;font-size:12px;">Chưa có ai được gọi...</span>';
+    return;
+  }
+  wrap.innerHTML = openedOrder.map((n, i) => `<div class="history-chip"><b>${i + 1}.</b>${esc(n)}</div>`).join('');
+}
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ===================== Result overlay + effects ===================== */
+function showResult(name){
+  document.getElementById('resultName').textContent = name;
+  document.getElementById('resultOverlay').classList.remove('hidden');
+  launchConfetti();
+}
+function closeResult(){
+  document.getElementById('resultOverlay').classList.add('hidden');
+}
+function launchConfetti(){
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors = ['#ffd43b','#ff6b6b','#4dabf7','#51cf66','#cc5de8','#ffa94d'];
+  const particles = Array.from({length: 110}, () => ({
+    x: Math.random() * canvas.width,
+    y: -20 - Math.random() * canvas.height * 0.3,
+    size: 5 + Math.random() * 6,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    speedY: 2 + Math.random() * 3,
+    speedX: (Math.random() - 0.5) * 2,
+    rotation: Math.random() * 360,
+    rotSpeed: (Math.random() - 0.5) * 10
+  }));
+  const start = Date.now();
+  function frame(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const elapsed = Date.now() - start;
+    particles.forEach(p => {
+      p.y += p.speedY;
+      p.x += p.speedX;
+      p.rotation += p.rotSpeed;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+      ctx.restore();
+    });
+    if(elapsed < 2600 && !document.getElementById('resultOverlay').classList.contains('hidden')){
+      requestAnimationFrame(frame);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+  frame();
+}
+function playChime(){
+  try{
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioCtx();
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      const t = ctx.currentTime + i * 0.12;
+      gain.gain.exponentialRampToValueAtTime(0.18, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(t); osc.stop(t + 0.4);
+    });
+  }catch(e){}
+}
+
+/* ===================== Footer actions ===================== */
+function replay(){
+  if(openedCount > 0 && openedCount < names.length){
+    if(!confirm('Vòng chơi hiện tại chưa mở hết các hộp. Bạn có chắc muốn chơi lại từ đầu không?')) return;
+  }
+  newRound();
+}
+function openSettings(){
+  document.getElementById('gameScreen').classList.add('hidden');
+  document.getElementById('setupScreen').classList.remove('hidden');
+  renderNameRows(names.length ? names : DEFAULT_NAMES);
+  document.getElementById('setupError').textContent = '';
+}
+function toggleFullscreen(){
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+  else document.exitFullscreen().catch(()=>{});
+}
+
+/* ===================== Bootstrap ===================== */
+(function init(){
+  renderNameRows(DEFAULT_NAMES);
+  document.getElementById('btnAddName').onclick = () => addNameRow('');
+  document.getElementById('btnStartGame').onclick = startGame;
+  document.getElementById('btnCloseResult').onclick = closeResult;
+  document.getElementById('btnReplay').onclick = replay;
+  document.getElementById('btnSettings').onclick = openSettings;
+  document.getElementById('btnFullscreen').onclick = toggleFullscreen;
+})();
+</script>
+</body>
+</html>
