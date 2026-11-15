@@ -148,7 +148,7 @@ const BOX_COLORS = ['#ff6b6b','#4dabf7','#51cf66','#cc5de8','#ffa94d','#20c997',
 
 /* ===================== State ===================== */
 let names = [];
-let assignment = [];
+let namesPool = [];
 let openedCount = 0;
 let openedOrder = [];
 
@@ -203,16 +203,13 @@ function startGame(){
 }
 
 /* ===================== Game screen ===================== */
-function shuffle(arr){
-  const a = arr.slice();
-  for(let i = a.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+function randomInt(maxExclusive){
+  const arr = new Uint32Array(1);
+  crypto.getRandomValues(arr);
+  return arr[0] % maxExclusive;
 }
 function newRound(){
-  assignment = shuffle(names);
+  namesPool = names.slice();
   openedCount = 0;
   openedOrder = [];
   document.getElementById('statTotal').textContent = String(names.length).padStart(2, '0');
@@ -225,7 +222,7 @@ function newRound(){
 function renderBoxGrid(){
   const grid = document.getElementById('boxGrid');
   grid.innerHTML = '';
-  assignment.forEach((_, i) => {
+  for(let i = 0; i < names.length; i++){
     const box = document.createElement('div');
     box.className = 'gift-box';
     box.innerHTML = `
@@ -233,9 +230,9 @@ function renderBoxGrid(){
         ${BOX_EMOJIS[i % BOX_EMOJIS.length]}
       </div>
       <div class="box-label">HỘP ${i + 1}</div>`;
-    box.querySelector('.box-face').addEventListener('click', () => openBox(i, box));
+    box.querySelector('.box-face').addEventListener('click', () => openBox(box));
     grid.appendChild(box);
-  });
+  }
 }
 function shade(hex, percent){
   const num = parseInt(hex.slice(1), 16);
@@ -247,14 +244,14 @@ function shade(hex, percent){
   b = Math.min(255, Math.max(0, b));
   return `#${(1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1)}`;
 }
-function openBox(idx, boxEl){
-  if(boxEl.classList.contains('opened')) return;
+function openBox(boxEl){
+  if(boxEl.classList.contains('opened') || namesPool.length === 0) return;
   const face = boxEl.querySelector('.box-face');
   face.classList.add('shaking');
   setTimeout(() => {
     boxEl.classList.add('opened');
     openedCount++;
-    const person = assignment[idx];
+    const person = namesPool.splice(randomInt(namesPool.length), 1)[0];
     openedOrder.push(person);
     document.getElementById('statRound').textContent = String(openedCount).padStart(2, '0');
     renderHistory();
